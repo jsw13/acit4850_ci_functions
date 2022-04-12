@@ -69,7 +69,7 @@ def call(dockerRepoName, imageName, portNum) {
                 }
                 steps {
                     sh "docker stop ${dockerRepoName} || true && docker rm ${dockerRepoName} || true"
-                    sh "docker run -d –p ${portNum}:${portNum} --name ${dockerRepoName} ${dockerRepoName}:latest"
+                    sh "docker run -d -p ${portNum}:${portNum} --name ${dockerRepoName} ${dockerRepoName}:latest"
                 }
             }
         }
