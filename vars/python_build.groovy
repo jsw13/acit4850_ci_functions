@@ -1,6 +1,12 @@
-def call(dockerRepoName, imageName) {
+def call(dockerRepoName, imageName, portNum) {
     pipeline {
         agent any
+    
+        parameters {
+            booleanParam(defaultValue: false, description: "Deploy the App", name: "DEPLOY")
+        }
+
+
         stages {
             stage("Build") {
                 steps {
@@ -55,6 +61,15 @@ def call(dockerRepoName, imageName) {
                 steps {
                     sh "zip app.zip *.py"
                     archiveArtifacts artifacts: "app.zip", fingerprint: true, onlyIfSuccessful: true
+                }
+            }
+            stage("Deliver") {
+                when {
+                    expression { params.DEPLOY }
+                }
+                steps {
+                    sh "docker stop ${dockerRepoName} || true && docker rm ${dockerRepoName} || true"
+                    sh "docker run -d –p ${portNum}:${portNum} --name ${dockerRepoName} ${dockerRepoName}:latest"
                 }
             }
         }
