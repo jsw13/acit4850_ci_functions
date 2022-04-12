@@ -1,4 +1,4 @@
-def call() {
+def call(dockerRepoName, imageName) {
     pipeline {
         agent any
         stages {
@@ -36,6 +36,18 @@ def call() {
                                 junit "${file.path}"
                             }
                         }
+                    }
+                }
+            }
+            stage("Package") {
+                when {
+                    expression { env.GIT_BRANCH == "origin/main" }
+                }
+                steps {
+                    withCredentials([string(credentialsId: "DockerHub", variable: "TOKEN")]) {
+                        sh "docker login -u 'j13jha' -p '$TOKEN' docker.io"
+                        sh "docker build -t ${dockerRepoName}:latest --tag j13jha/${dockerRepoName}:${imageName} ."
+                        sh "docker push j13jha/${dockerRepoName}:${imageName}"
                     }
                 }
             }
